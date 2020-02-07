@@ -5,36 +5,39 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "Spawnpoints/SpawnPortal.h"
+#include "Engine/DataTable.h"
 #include "NormalWaveMode.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class TOPDOWNARPG_API ANormalWaveMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
-	int totalWaves = 7;
+	UPROPERTY(EditDefaultsOnly)
+	class UDataTable* wavesDT;
 
-	UPROPERTY(EditAnywhere)
-	int currentWave = 1;
+	int totalWaves;
 
-	UPROPERTY(EditAnywhere)
-	int enemiesInCurrentWave = 5;
+	int currentWave;
+
+	int enemiesInCurrentWave;
 
 	int enemiesToSpawn;
 
 
 	UPROPERTY(EditAnywhere)
-	float spawnInterval;
+	float spawnInterval = 2.0f;
 
 	FTimerHandle SpawnTimerHandle;
 
-	
-
 	TArray<ASpawnPortal*> portals;
+
+	TArray<int> currentSpawnQueue;
+
+	int currentSpawnQueueFront;
+
+	TArray<TArray<FString>> waveData;
 
 	TArray<ASpawnPortal*> getPortalsFromWorld();
 
@@ -42,14 +45,15 @@ class TOPDOWNARPG_API ANormalWaveMode : public AGameModeBase
 
 	int countActorsInWorld()const;
 
-	int generateNewEnemyCount();
+	void generateSpawnQueueForCurrentWave();
+
+	void readDataTable();
 
 	UFUNCTION()
 	void activateSpawner();
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	
 
 	virtual void BeginPlay() override;
 

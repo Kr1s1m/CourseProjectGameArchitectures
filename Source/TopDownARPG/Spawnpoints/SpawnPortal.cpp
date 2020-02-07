@@ -33,10 +33,8 @@ bool ASpawnPortal::SpawnActorFromPortalSlot(int slotNumber)
 	if (IsValid(World) == false)
 	{
 		UE_LOG(LogTopDownARPG, Error, TEXT("ASpawnPortal::SpawnActor IsValid(World) == false"));
+		return false;
 	}
-
-
-	
 
 
 	FActorSpawnParameters SpawnParameters;

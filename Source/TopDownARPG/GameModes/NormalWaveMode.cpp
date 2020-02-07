@@ -6,26 +6,33 @@
 #include "Spawnpoints\SpawnPortal.h"
 #include "Characters\TopDownARPGWarriorEnemy.h"
 #include "EngineUtils.h"
+#include <algorithm>
+#include <random>
 #include <time.h>
 
 TArray<ASpawnPortal*> ANormalWaveMode::getPortalsFromWorld()
 {
 	UWorld* World = GetWorld();
 
-	TArray<ASpawnPortal*> portalsFound;
+	if(IsValid(World))
+	{ 
 
-	for (TActorIterator<ASpawnPortal> portalIterator = TActorIterator<ASpawnPortal>(World); portalIterator; ++portalIterator)
-	{
+		TArray<ASpawnPortal*> portalsFound;
 
-		if (IsValid(*portalIterator))
+		for (TActorIterator<ASpawnPortal> portalIterator = TActorIterator<ASpawnPortal>(World); portalIterator; ++portalIterator)
 		{
-			portalsFound.Add(*portalIterator);
-			
+
+			if (IsValid(*portalIterator))
+			{
+				portalsFound.Add(*portalIterator);
+
+			}
 		}
 
+		return portalsFound;
 	}
 
-	return portalsFound;
+		return {};
 }
 
 ASpawnPortal* ANormalWaveMode::getRandomPortal()
@@ -61,50 +68,95 @@ int ANormalWaveMode::countActorsInWorld()const
 	return charCount;
 }
 
-int ANormalWaveMode::generateNewEnemyCount()
-{	
-	int newValue = enemiesInCurrentWave  + 1;
+void ANormalWaveMode::generateSpawnQueueForCurrentWave()
+{
+	if (currentWave < 0 || currentWave > waveData.Num() - 1)
+		return;
 
-	enemiesInCurrentWave = newValue;
+	int currentRowIndex = currentWave;
+	int enemiesInSpawnQue = 0;
+
+	TArray<int> currentRow;
+
+	std::vector<int> temp;
+
+	for (int i = 1; i < waveData[currentRowIndex].Num(); i++)
+		currentRow.Add(FCString::Atoi(*waveData[currentRowIndex][i]));
+
+	int currentSlot = 0;
+
+	for (auto& number : currentRow)
+	{
+		if (number != 0)
+		{
+			for (int i = 0; i < number; i++)
+			{
+				temp.push_back(currentSlot);
+				enemiesInSpawnQue++;
+			}
+		}
+
+		currentSlot++;
+	}
+
+	std::random_shuffle(temp.begin(), temp.end());
+
+	for (int num : temp)
+		currentSpawnQueue.Add(num);
+
+	//std::random_shuffle(currentSpawnQueue.begin(), currentSpawnQueue.end());
+
+	currentSpawnQueueFront = 0;
+
+	enemiesToSpawn = enemiesInSpawnQue;
+}
+
+
+void ANormalWaveMode::readDataTable()
+{
+	if (IsValid(wavesDT))
+	{
+
+		if (wavesDT->GetTableData().Num() > 0)
+		{
+			waveData = wavesDT->GetTableData();
+			totalWaves = waveData.Num() - 1;
+		}
+
+	}
 	
-	return newValue;
+	
+
 }
 
 void ANormalWaveMode::activateSpawner()
 {
-	if (enemiesToSpawn > 0)
+	if (enemiesToSpawn > 0 && currentSpawnQueue.Num() > 0 && currentSpawnQueueFront < currentSpawnQueue.Num())
 	{
-		srand(time(NULL));
-		int randomSlot = rand() % 3;
-
-		getRandomPortal()->SpawnActorFromPortalSlot(randomSlot);
-
-		enemiesToSpawn--;
+		getRandomPortal()->SpawnActorFromPortalSlot(currentSpawnQueue[currentSpawnQueueFront]);
+			currentSpawnQueueFront++;
+			enemiesToSpawn--;
 	}
-	else if (countActorsInWorld() == 1 && currentWave <= totalWaves)
+	else if (countActorsInWorld() == 1 && currentWave < totalWaves)
 	{
-		enemiesToSpawn = generateNewEnemyCount();
 		currentWave++;
+		currentSpawnQueue.Empty();
+		generateSpawnQueueForCurrentWave();
 	}
-
-
 }
 
-void ANormalWaveMode::Tick(float DeltaTime)
-{
-
-	Super::Tick(DeltaTime);
-
-	
-}
 
 void ANormalWaveMode::BeginPlay()
 {
-	enemiesToSpawn = enemiesInCurrentWave;
+	readDataTable();
+
+	currentWave = 1;
+
+	generateSpawnQueueForCurrentWave();
 
 	portals = getPortalsFromWorld();
 
-	GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ANormalWaveMode::activateSpawner,5.0f, true, 5.0f);
+	GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ANormalWaveMode::activateSpawner, spawnInterval, true, spawnInterval);
 
 
 	

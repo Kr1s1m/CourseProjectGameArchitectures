@@ -14,8 +14,13 @@
 #include "TopDownARPG.h"
 #include "GameModes/TopDownARPGGameMode.h"
 
+
+
 ATopDownARPGCharacter::ATopDownARPGCharacter()
 {
+
+	
+
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -47,6 +52,7 @@ ATopDownARPGCharacter::ATopDownARPGCharacter()
 	CursorToWorld = CreateDefaultSubobject<UDecalComponent>("CursorToWorld");
 	CursorToWorld->SetupAttachment(RootComponent);
 	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("Material'/Game/TopDownCPP/Blueprints/M_Cursor_Decal.M_Cursor_Decal'"));
+
 	if (DecalMaterialAsset.Succeeded())
 	{
 		CursorToWorld->SetDecalMaterial(DecalMaterialAsset.Object);
