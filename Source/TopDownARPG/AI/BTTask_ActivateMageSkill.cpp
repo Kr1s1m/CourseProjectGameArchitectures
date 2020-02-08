@@ -2,7 +2,14 @@
 
 
 #include "BTTask_ActivateMageSkill.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/Blackboard/BlackBoardKeyAllTypes.h"
+#include "Characters/TopDownARPGCharacter.h"
 #include "Controllers/MageAIController.h"
+#include "TopDownARPG.h"
+
 
 EBTNodeResult::Type UBTTask_ActivateMageSkill::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -18,7 +25,16 @@ EBTNodeResult::Type UBTTask_ActivateMageSkill::ExecuteTask(UBehaviorTreeComponen
 		return EBTNodeResult::Failed;
 	}
 
-	FVector AimLocation = EnemyPawn->GetActorLocation() + EnemyPawn->GetActorForwardVector() * 100.0f;
+    FVector AimLocation = EnemyPawn->GetActorLocation() + EnemyPawn->GetActorForwardVector() * 100.0f;
+
+	ATopDownARPGCharacter* targetChar = Cast<ATopDownARPGCharacter>(OwnerComp.GetBlackboardComponent()->GetValue<UBlackboardKeyType_Object>(MageAIController->TargetID));
+
+	if (IsValid(targetChar))
+	{
+		AimLocation = targetChar->GetActorLocation();
+	}
+
+
 	MageAIController->ActivateAbility(AimLocation);
 
 	return EBTNodeResult::Succeeded;

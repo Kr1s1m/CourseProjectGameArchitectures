@@ -88,6 +88,11 @@ void ATopDownARPGCharacter::BeginPlay()
 	}
 }
 
+bool ATopDownARPGCharacter::isDamaged() const
+{
+	return Health != MaximumHealth;
+}
+
 
 void ATopDownARPGCharacter::Tick(float DeltaSeconds)
 {
