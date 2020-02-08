@@ -28,6 +28,12 @@ class TOPDOWNARPG_API AMageAIController : public AAIController
 	UPROPERTY()
 		class UBehaviorTreeComponent* BehaviourTreeComponent;
 
-	public:
+public:
+
+	UPROPERTY(EditDefaultsOnly)
+	float maxRange;
+
 	void ActivateAbility(FVector AimLocation);
+
+	uint8 TargetID;
 };

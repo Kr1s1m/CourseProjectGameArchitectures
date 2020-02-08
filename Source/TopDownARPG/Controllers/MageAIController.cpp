@@ -21,7 +21,11 @@ void AMageAIController::OnPossess(APawn* InPawn)
 	if (IsValid(BehaviourTree))
 	{
 		BlackboardComponent->InitializeBlackboard(*BehaviourTree->BlackboardAsset);
+		TargetID = BlackboardComponent->GetKeyID("Target");
+
 		BehaviourTreeComponent->StartTree(*BehaviourTree);
+
+		
 	}
 }
 
