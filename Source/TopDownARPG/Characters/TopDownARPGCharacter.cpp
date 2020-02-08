@@ -80,12 +80,14 @@ void ATopDownARPGCharacter::BeginPlay()
 	}
 
 	Health = CharacterStruct->MaximumHealth;
+	MaximumHealth = Health;
 
 	for (const TSubclassOf<UAbility>Template : CharacterStruct->AbilityTemplates)
 	{
 		AbilityInstances.Add(NewObject<UAbility>(this, Template));
 	}
 }
+
 
 void ATopDownARPGCharacter::Tick(float DeltaSeconds)
 {
@@ -107,8 +109,18 @@ void ATopDownARPGCharacter::Tick(float DeltaSeconds)
 
 void ATopDownARPGCharacter::TakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigateBy, AActor* DamageCauser)
 {
-	UE_LOG(LogTopDownARPG, Display, TEXT("ATopDownARPGCharacter::TakeAnyDamage current health = %f"), (Health - Damage));
-	Health -= Damage;
+	
+	
+	if (Health - Damage <= MaximumHealth)
+	{
+		UE_LOG(LogTopDownARPG, Display, TEXT("ATopDownARPGCharacter::TakeAnyDamage current health = %f"), (Health - Damage));
+		Health -= Damage;
+	}
+	else
+		Health = MaximumHealth;
+
+	
+
 	if (Health <= 0.0f)
 	{
 		Death();
